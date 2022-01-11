@@ -4,19 +4,22 @@ export class SimpleCache {
         this._duration = duration
         this._expireAt = 0
         this._cached   = nil
+        this._lock     = @concurrent.Mutex()
     }
     get() {
-		log.debug('getting $this')
         now := @time.time()
         if now > this._expireAt {
-            this.refresh()
+            this._lock.lock()
+            blockDefer this._lock.unlock()
+            if now > this._expireAt {
+                this.refresh()
+            }
         }
         return this._cached
     }
     refresh() {
         this._cached = this._getFunc()
         this._expireAt = @time.time() + this._duration
-		log.debug('refreshed', this._cached)
     }
 }
 
