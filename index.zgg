@@ -1,0 +1,27 @@
+export class SimpleCache {
+    __init__(getFunc, duration) {
+        this._getFunc  = getFunc
+        this._duration = duration
+        this._expireAt = 0
+        this._cached   = nil
+    }
+    get() {
+        now := @time.time()
+        if now > this._expireAt {
+            this.refresh()
+        }
+        return this._cached
+    }
+    refresh() {
+        this._cached = this._getFunc()
+        this._expireAt = @time.time() + this._duration
+    }
+}
+
+if isMain {
+    c := SimpleCache(@time.time, 3)
+    for i in 10 {
+        println(i, c.get())
+        @time.sleep(1)
+    }
+}
